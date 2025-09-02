@@ -1,0 +1,21 @@
+{
+    "openai_key": "your-groq-api-key-here",
+    "model": "openai/gpt-oss-20b",
+    "voice_settings": {
+        "pitch": 1.2,
+        "rate": 1.3,
+        "voice_type": "female"
+    },
+    "company_context": {
+        "name": "AL RAWABI GROUP OF COMPANIES",
+        "role": "Receptionist",
+        "services": [
+            "Appointment scheduling",
+            "Office location guidance",
+            "Room number information",
+            "Company service explanations",
+            "Building directions",
+            "Contact information"
+        ]
+    }
+}

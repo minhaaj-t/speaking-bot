@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Environment variables and API keys
+api.json
+
+# Log files
+*.log
+
+# Optional npm cache
+.npm
+
+# IDE files
+.vscode/
