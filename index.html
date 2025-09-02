@@ -303,34 +303,9 @@
 
         async init() {
           try {
-            // Try to get API config from environment variables first, then from api.json
-            const groqApiKey = this.getEnvVariable('GROQ_API_KEY');
-            if (groqApiKey) {
-              this.API_CONFIG = {
-                openai_key: groqApiKey,
-                model: "openai/gpt-oss-20b",
-                voice_settings: {
-                  pitch: 1.2,
-                  rate: 1.3,
-                  voice_type: "female"
-                },
-                company_context: {
-                  name: "AL RAWABI GROUP OF COMPANIES",
-                  role: "Receptionist",
-                  services: [
-                    "Appointment scheduling",
-                    "Office location guidance",
-                    "Room number information",
-                    "Company service explanations",
-                    "Building directions",
-                    "Contact information"
-                  ]
-                }
-              };
-            } else {
-              const response = await fetch('./api.json');
-              this.API_CONFIG = await response.json();
-            }
+            // For Vercel deployment, we'll prompt for the API key if not found
+            const response = await fetch('./api.json');
+            this.API_CONFIG = await response.json();
 
             if (!this.API_CONFIG?.openai_key) throw new Error('Missing Groq API key');
 
@@ -351,16 +326,55 @@
 
             console.log('Receptionist Agent initialized successfully');
           } catch (error) {
-            this.showError(`Initialization failed: ${error.message}`);
+            // If we can't load api.json, prompt for API key
+            this.promptForApiKey();
           }
         }
 
-        // Helper function to get environment variables
-        getEnvVariable(name) {
-          // In a browser environment, we can't directly access process.env
-          // This is a simple fallback that would work in a server-side rendered app
-          // For client-side, you would need to pass this through your server
-          return null;
+        promptForApiKey() {
+          const apiKey = prompt("Please enter your Groq API key:");
+          if (apiKey) {
+            this.API_CONFIG = {
+              openai_key: apiKey,
+              model: "openai/gpt-oss-20b",
+              voice_settings: {
+                pitch: 1.2,
+                rate: 1.3,
+                voice_type: "female"
+              },
+              company_context: {
+                name: "AL RAWABI GROUP OF COMPANIES",
+                role: "Receptionist",
+                services: [
+                  "Appointment scheduling",
+                  "Office location guidance",
+                  "Room number information",
+                  "Company service explanations",
+                  "Building directions",
+                  "Contact information"
+                ]
+              }
+            };
+            
+            this.talkVideo.setAttribute('playsinline', '');
+            this.setupEventListeners();
+
+            // Set up video event listeners
+            this.setupVideoListeners();
+
+            // Set up fullscreen event listeners
+            this.setupFullscreenListeners();
+
+            // Initialize talk segments for realistic lip-sync
+            this.initializeTalkSegments();
+
+            // Initialize speech recognition
+            this.initSpeechRecognition();
+
+            console.log('Receptionist Agent initialized successfully with provided API key');
+          } else {
+            this.showError('API key is required to use this application.');
+          }
         }
 
         // Initialize speech recognition

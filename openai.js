@@ -1,14 +1,9 @@
-import { getEnvVar } from './utils/env.js';
-
 export async function fetchGroqResponse(apiKey, userMessage) {
-  // Use environment variable if available, otherwise use provided apiKey
-  const groqApiKey = getEnvVar('GROQ_API_KEY', apiKey);
-  
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${groqApiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
