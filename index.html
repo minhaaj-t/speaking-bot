@@ -303,10 +303,36 @@
 
         async init() {
           try {
-            const response = await fetch('./api.json');
-            this.API_CONFIG = await response.json();
+            // Try to get API config from environment variables first, then from api.json
+            const groqApiKey = this.getEnvVariable('GROQ_API_KEY');
+            if (groqApiKey) {
+              this.API_CONFIG = {
+                openai_key: groqApiKey,
+                model: "openai/gpt-oss-20b",
+                voice_settings: {
+                  pitch: 1.2,
+                  rate: 1.3,
+                  voice_type: "female"
+                },
+                company_context: {
+                  name: "AL RAWABI GROUP OF COMPANIES",
+                  role: "Receptionist",
+                  services: [
+                    "Appointment scheduling",
+                    "Office location guidance",
+                    "Room number information",
+                    "Company service explanations",
+                    "Building directions",
+                    "Contact information"
+                  ]
+                }
+              };
+            } else {
+              const response = await fetch('./api.json');
+              this.API_CONFIG = await response.json();
+            }
 
-            if (!this.API_CONFIG?.openai_key) throw new Error('Missing Groq API key in api.json');
+            if (!this.API_CONFIG?.openai_key) throw new Error('Missing Groq API key');
 
             this.talkVideo.setAttribute('playsinline', '');
             this.setupEventListeners();
@@ -327,6 +353,14 @@
           } catch (error) {
             this.showError(`Initialization failed: ${error.message}`);
           }
+        }
+
+        // Helper function to get environment variables
+        getEnvVariable(name) {
+          // In a browser environment, we can't directly access process.env
+          // This is a simple fallback that would work in a server-side rendered app
+          // For client-side, you would need to pass this through your server
+          return null;
         }
 
         // Initialize speech recognition
@@ -509,6 +543,9 @@
 
           // Microphone button for speech-to-text
           document.getElementById('microphone-button').addEventListener('click', () => this.toggleSpeechRecognition());
+          
+          // Store reference to speech status element
+          this.speechStatus = document.getElementById('speech-status');
         }
 
         // Toggle speech recognition

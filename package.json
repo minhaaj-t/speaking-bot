@@ -6,6 +6,7 @@
     "openai": "^4.12.4"
   },
   "scripts": {
-    "dev": "node app.js"
+    "dev": "node app.js",
+    "start": "node api/server.js"
   }
 }
