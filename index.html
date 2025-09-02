@@ -279,7 +279,6 @@
       // Fully local implementation for AL RAWABI GROUP OF COMPANIES Receptionist
       class ReceptionistAgent {
         constructor() {
-          this.API_CONFIG = null;
           this.userName = '';
           this.isConnected = false;
           this.isSpeaking = false;
@@ -303,13 +302,6 @@
 
         async init() {
           try {
-            // For Vercel deployment, we'll prompt for the API key if not found
-            const response = await fetch('./api.json');
-            this.API_CONFIG = await response.json();
-
-            if (!this.API_CONFIG?.openai_key) throw new Error('Missing Groq API key');
-
-            this.talkVideo.setAttribute('playsinline', '');
             this.setupEventListeners();
 
             // Set up video event listeners
@@ -326,54 +318,7 @@
 
             console.log('Receptionist Agent initialized successfully');
           } catch (error) {
-            // If we can't load api.json, prompt for API key
-            this.promptForApiKey();
-          }
-        }
-
-        promptForApiKey() {
-          const apiKey = prompt("Please enter your Groq API key:");
-          if (apiKey) {
-            this.API_CONFIG = {
-              openai_key: apiKey,
-              model: "openai/gpt-oss-20b",
-              voice_settings: {
-                pitch: 1.2,
-                rate: 1.3,
-                voice_type: "female"
-              },
-              company_context: {
-                name: "AL RAWABI GROUP OF COMPANIES",
-                role: "Receptionist",
-                services: [
-                  "Appointment scheduling",
-                  "Office location guidance",
-                  "Room number information",
-                  "Company service explanations",
-                  "Building directions",
-                  "Contact information"
-                ]
-              }
-            };
-            
-            this.talkVideo.setAttribute('playsinline', '');
-            this.setupEventListeners();
-
-            // Set up video event listeners
-            this.setupVideoListeners();
-
-            // Set up fullscreen event listeners
-            this.setupFullscreenListeners();
-
-            // Initialize talk segments for realistic lip-sync
-            this.initializeTalkSegments();
-
-            // Initialize speech recognition
-            this.initSpeechRecognition();
-
-            console.log('Receptionist Agent initialized successfully with provided API key');
-          } else {
-            this.showError('API key is required to use this application.');
+            this.showError(`Initialization failed: ${error.message}`);
           }
         }
 
@@ -609,8 +554,6 @@
             // Add a loading animation to the input field
             document.getElementById('input-container').classList.add('loading');
         
-            const { fetchGroqResponse } = await import('./openai.js');
-            
             // Add context about AL RAWABI GROUP OF COMPANIES
             const contextMessage = `You are a receptionist for AL RAWABI GROUP OF COMPANIES. Please provide helpful information about:
             - Appointment scheduling
@@ -621,7 +564,7 @@
             
             User's name is ${this.userName}. User's question: ${userMessage}`;
             
-            const aiResponse = await fetchGroqResponse(this.API_CONFIG.openai_key, contextMessage);
+            const aiResponse = await this.fetchGroqResponse(contextMessage);
             
             // Use text-to-speech with receptionist voice (no text display)
             await this.speakResponse(aiResponse);
@@ -636,6 +579,29 @@
         
             // Remove the loading animation in case of an error
             document.getElementById('input-container').classList.remove('loading');
+          }
+        }
+
+        async fetchGroqResponse(userMessage) {
+          try {
+            const response = await fetch('/api/groq', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ message: userMessage }),
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(`API error: ${errorData.error || 'Unknown error'}`);
+            }
+            
+            const data = await response.json();
+            return data.reply;
+          } catch (error) {
+            console.error('Groq API Error:', error);
+            return "I'm sorry, I'm having trouble processing your request. Could you please try again?";
           }
         }
 
@@ -687,8 +653,8 @@
                 }
                 
                 // Receptionist settings
-                utterance.rate = this.API_CONFIG.voice_settings?.rate || 1.3;
-                utterance.pitch = this.API_CONFIG.voice_settings?.pitch || 1.2;
+                utterance.rate = 1.3;
+                utterance.pitch = 1.2;
                 utterance.volume = 1.0;
                 
                 // Create speech events for lip-sync
