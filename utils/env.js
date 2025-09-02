@@ -3,8 +3,12 @@
  */
 
 export function getEnvVar(name, defaultValue = null) {
-    // For browser environment, we'll need to pass environment variables through the server
-    // For now, we'll just return the default value
+    // In Vercel/serverless environment, process.env is available
+    if (typeof process !== 'undefined' && process.env && process.env[name]) {
+        return process.env[name];
+    }
+    
+    // For browser environment or if env var not found, return default value
     return defaultValue;
 }
 

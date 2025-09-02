@@ -29,7 +29,7 @@ export default async function handler(request, response) {
     const apiKey = getEnvVar('GROQ_API_KEY');
     
     if (!apiKey) {
-      response.status(500).json({ error: 'Groq API key not configured' });
+      response.status(500).json({ error: 'Groq API key not configured. Please set the GROQ_API_KEY environment variable in your Vercel project settings.' });
       return;
     }
     
