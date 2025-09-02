@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AL RAWABI GROUP OF COMPANIES Receptionist</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: #000000;
+        color: #FFD700; /* Golden color */
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      #video-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+      }
+
+      #idle-video,
+      #talk-video {
+        width: auto; /* Fit height, not width */
+        height: 100%;
+        object-fit: contain; /* Contain to show full video */
+      }
+
+      #talk-video {
+        display: none;
+      }
+
+      #input-container {
+        position: fixed;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        max-width: 500px;
+        z-index: 10;
+        display: none;
+      }
+
+      #user-input-field {
+        width: 100%;
+        padding: 15px 60px 15px 60px; /* Added space for microphone button */
+        border-radius: 30px;
+        border: 2px solid #FFD700; /* Golden color */
+        background: rgba(0, 0, 0, 0.7);
+        color: #FFD700; /* Golden color */
+        font-size: 18px;
+        outline: none;
+        text-align: center;
+      }
+
+      #enter-button {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #FFD700; /* Golden color */
+        border: none;
+        color: #000;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 8px 15px;
+        border-radius: 50%;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+
+      #enter-button:hover {
+        background: #FFEC8B; /* Light golden color */
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      #fullscreen-indicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #FFD700; /* Golden color */
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        z-index: 100;
+        display: none;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .visible {
+        display: block !important;
+      }
+
+      /* Fullscreen styles */
+      :-webkit-full-screen {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      :-moz-full-screen {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      :-ms-fullscreen {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      :full-screen {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      /* Loading animation */
+      #input-container.loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 60px;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-top: 3px solid #FFD700; /* Golden color */
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+      }
+
+      @keyframes spinner-border {
+        100% {
+          transform: translateY(-50%) rotate(360deg);
+        }
+      }
+
+      /* Initial name input */
+      #name-input-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        max-width: 500px;
+        z-index: 20;
+        text-align: center;
+      }
+
+      #name-input-field {
+        width: 100%;
+        padding: 15px;
+        border-radius: 30px;
+        border: 2px solid #FFD700; /* Golden color */
+        background: rgba(0, 0, 0, 0.7);
+        color: #FFD700; /* Golden color */
+        font-size: 18px;
+        outline: none;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      #name-enter-button {
+        background: #FFD700; /* Golden color */
+        border: none;
+        color: #000;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+
+      #name-enter-button:hover {
+        background: #FFEC8B; /* Light golden color */
+        transform: scale(1.05);
+      }
+
+      #company-name {
+        position: fixed;
+        bottom: 20px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 16px;
+        color: #FFD700; /* Golden color */
+        z-index: 10;
+      }
+
+      /* Microphone button for speech-to-text */
+      #microphone-button {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #FFD700; /* Golden color */
+        border: none;
+        color: #000;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 8px 15px;
+        border-radius: 50%;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+
+      #microphone-button:hover {
+        background: #FFEC8B; /* Light golden color */
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      #microphone-button.listening {
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes pulse {
+        0% { transform: translateY(-50%) scale(1); }
+        50% { transform: translateY(-50%) scale(1.1); }
+        100% { transform: translateY(-50%) scale(1); }
+      }
+
+      /* Speech recognition status */
+      #speech-status {
+        position: fixed;
+        top: 120px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 16px;
+        color: #FFD700; /* Golden color */
+        z-index: 10;
+        padding: 0 20px;
+        display: none;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="video-container">
+      <video id="idle-video" src="./oracle_Idle.mp4" autoplay muted loop playsinline></video>
+      <video id="talk-video" src="./talk.mp4" autoplay muted playsinline></video>
+    </div>
+
+    <div id="speech-status">Listening...</div>
+
+    <div id="name-input-container">
+      <input type="text" id="name-input-field" placeholder="Enter your name">
+      <button id="name-enter-button">Enter</button>
+    </div>
+
+    <div id="input-container">
+      <button id="microphone-button">🎤</button>
+      <input type="text" id="user-input-field" placeholder="How can I help you today?">
+      <button id="enter-button">↵</button>
+    </div>
+
+    <div id="company-name">AL RAWABI GROUP OF COMPANIES</div>
+    <div id="fullscreen-indicator">Press ESC to exit fullscreen</div>
+
+    <script type="module">
+      // Fully local implementation for AL RAWABI GROUP OF COMPANIES Receptionist
+      class ReceptionistAgent {
+        constructor() {
+          this.API_CONFIG = null;
+          this.userName = '';
+          this.isConnected = false;
+          this.isSpeaking = false;
+          this.speechTimeout = null;
+          this.isFullscreen = false;
+          this.talkSegments = [];
+          this.speechEvents = [];
+          this.currentSpeechEventIndex = 0;
+          this.recognition = null;
+          this.isListening = false;
+
+          this.idleVideo = document.getElementById('idle-video');
+          this.talkVideo = document.getElementById('talk-video');
+
+          // Set video durations
+          this.idleVideoDuration = 10; // 10 seconds
+          this.talkVideoDuration = 19; // 19 seconds
+
+          this.init();
+        }
+
+        async init() {
+          try {
+            const response = await fetch('./api.json');
+            this.API_CONFIG = await response.json();
+
+            if (!this.API_CONFIG?.openai_key) throw new Error('Missing Groq API key in api.json');
+
+            this.talkVideo.setAttribute('playsinline', '');
+            this.setupEventListeners();
+
+            // Set up video event listeners
+            this.setupVideoListeners();
+
+            // Set up fullscreen event listeners
+            this.setupFullscreenListeners();
+
+            // Initialize talk segments for realistic lip-sync
+            this.initializeTalkSegments();
+
+            // Initialize speech recognition
+            this.initSpeechRecognition();
+
+            console.log('Receptionist Agent initialized successfully');
+          } catch (error) {
+            this.showError(`Initialization failed: ${error.message}`);
+          }
+        }
+
+        // Initialize speech recognition
+        initSpeechRecognition() {
+          if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            this.recognition = new SpeechRecognition();
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+            this.recognition.lang = 'en-US';
+
+            this.recognition.onstart = () => {
+              this.isListening = true;
+              document.getElementById('microphone-button').classList.add('listening');
+              this.speechStatus.style.display = 'block';
+              console.log('Speech recognition started');
+            };
+
+            this.recognition.onresult = (event) => {
+              const transcript = event.results[0][0].transcript;
+              document.getElementById('user-input-field').value = transcript;
+              this.speechStatus.style.display = 'none';
+              console.log('Speech recognized:', transcript);
+              
+              // Automatically submit the recognized text
+              this.handleTalk();
+            };
+
+            this.recognition.onerror = (event) => {
+              console.error('Speech recognition error:', event.error);
+              this.isListening = false;
+              document.getElementById('microphone-button').classList.remove('listening');
+              this.speechStatus.style.display = 'none';
+              this.showError('Speech recognition error: ' + event.error);
+            };
+
+            this.recognition.onend = () => {
+              this.isListening = false;
+              document.getElementById('microphone-button').classList.remove('listening');
+              this.speechStatus.style.display = 'none';
+              console.log('Speech recognition ended');
+            };
+          } else {
+            console.log('Speech recognition not supported in this browser');
+            // Hide microphone button if not supported
+            document.getElementById('microphone-button').style.display = 'none';
+          }
+        }
+
+        // Initialize talk segments for realistic lip-sync effect
+        initializeTalkSegments() {
+          // Define different segments of the talk video for realistic playback
+          this.talkSegments = [
+            { start: 0.0, duration: 2.0, type: "opening" },     // Opening greeting
+            { start: 2.0, duration: 1.5, type: "short_a" },     // Short vowel sounds
+            { start: 3.5, duration: 2.5, type: "consonant" },   // Consonant sounds
+            { start: 6.0, duration: 3.0, type: "long_a" },      // Long vowel sounds
+            { start: 9.0, duration: 2.0, type: "pause" },       // Pause/transition
+            { start: 11.0, duration: 2.5, type: "emphasis" },   // Emphasis/gestures
+            { start: 13.5, duration: 2.0, type: "short_e" },    // Short E sounds
+            { start: 15.5, duration: 3.5, type: "closing" }     // Closing statement
+          ];
+        }
+
+        setupVideoListeners() {
+          // Loop the idle video
+          this.idleVideo.addEventListener('ended', () => {
+            this.idleVideo.currentTime = 0;
+            this.idleVideo.play();
+          });
+
+          // Handle talk video segments
+          this.talkVideo.addEventListener('timeupdate', () => {
+            if (this.isSpeaking && this.currentSegment) {
+              // Check if we've reached the end of the current segment
+              if (this.talkVideo.currentTime >= this.currentSegment.start + this.currentSegment.duration) {
+                // If we have more speech events, play the next appropriate segment
+                if (this.currentSpeechEventIndex < this.speechEvents.length - 1) {
+                  this.currentSpeechEventIndex++;
+                  this.playAppropriateSegment(this.speechEvents[this.currentSpeechEventIndex]);
+                } else {
+                  // Otherwise, continue with random segments
+                  this.playRandomTalkSegment();
+                }
+              }
+            }
+          });
+
+          // Loop the talk video when speaking
+          this.talkVideo.addEventListener('ended', () => {
+            if (this.isSpeaking) {
+              this.playRandomTalkSegment();
+            }
+          });
+        }
+
+        setupFullscreenListeners() {
+          document.addEventListener('fullscreenchange', () => {
+            this.isFullscreen = !!document.fullscreenElement;
+            document.getElementById('fullscreen-indicator').style.display = this.isFullscreen ? 'block' : 'none';
+          });
+
+          document.addEventListener('webkitfullscreenchange', () => {
+            this.isFullscreen = !!document.webkitFullscreenElement;
+            document.getElementById('fullscreen-indicator').style.display = this.isFullscreen ? 'block' : 'none';
+          });
+
+          document.addEventListener('mozfullscreenchange', () => {
+            this.isFullscreen = !!document.mozFullScreenElement;
+            document.getElementById('fullscreen-indicator').style.display = this.isFullscreen ? 'block' : 'none';
+          });
+
+          document.addEventListener('keydown', (e) => {
+            // Ctrl+F for fullscreen
+            if (e.ctrlKey && e.key === 'f') {
+              e.preventDefault();
+              this.toggleFullscreen();
+            }
+            
+            // ESC to exit fullscreen
+            if (e.key === 'Escape' && this.isFullscreen) {
+              this.exitFullscreen();
+            }
+          });
+        }
+
+        toggleFullscreen() {
+          if (!this.isFullscreen) {
+            this.enterFullscreen();
+          } else {
+            this.exitFullscreen();
+          }
+        }
+
+        async enterFullscreen() {
+          const elem = document.documentElement;
+          try {
+            if (elem.requestFullscreen) {
+              await elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              await elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+              await elem.mozRequestFullScreen();
+            }
+            this.isFullscreen = true;
+            document.getElementById('fullscreen-indicator').style.display = 'block';
+          } catch (err) {
+            console.log('Fullscreen error:', err);
+          }
+        }
+
+        exitFullscreen() {
+          try {
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+            }
+            this.isFullscreen = false;
+            document.getElementById('fullscreen-indicator').style.display = 'none';
+          } catch (err) {
+            console.log('Exit fullscreen error:', err);
+          }
+        }
+
+        setupEventListeners() {
+          // Name input
+          document.getElementById('name-enter-button').addEventListener('click', () => this.handleNameEnter());
+          document.getElementById('name-input-field').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleNameEnter();
+          });
+
+          // Chat input
+          document.getElementById('enter-button').addEventListener('click', () => this.handleTalk());
+          document.getElementById('user-input-field').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleTalk();
+          });
+
+          // Microphone button for speech-to-text
+          document.getElementById('microphone-button').addEventListener('click', () => this.toggleSpeechRecognition());
+        }
+
+        // Toggle speech recognition
+        toggleSpeechRecognition() {
+          if (!this.recognition) {
+            this.showError('Speech recognition is not supported in your browser');
+            return;
+          }
+
+          if (this.isListening) {
+            this.recognition.stop();
+          } else {
+            try {
+              this.recognition.start();
+            } catch (error) {
+              console.error('Error starting speech recognition:', error);
+              this.showError('Error starting speech recognition: ' + error.message);
+            }
+          }
+        }
+
+        handleNameEnter() {
+          const nameInput = document.getElementById('name-input-field');
+          this.userName = nameInput.value.trim();
+          
+          if (!this.userName) {
+            alert('Please enter your name');
+            return;
+          }
+
+          // Hide name input and show chat interface
+          document.getElementById('name-input-container').style.display = 'none';
+          document.getElementById('input-container').style.display = 'block';
+          
+          // Focus on chat input
+          document.getElementById('user-input-field').focus();
+        }
+
+        async handleTalk() {
+          try {
+            const userMessage = document.getElementById('user-input-field').value.trim();
+            if (!userMessage) {
+              alert('Please enter your question');
+              return;
+            }
+        
+            // Add a loading animation to the input field
+            document.getElementById('input-container').classList.add('loading');
+        
+            const { fetchGroqResponse } = await import('./openai.js');
+            
+            // Add context about AL RAWABI GROUP OF COMPANIES
+            const contextMessage = `You are a receptionist for AL RAWABI GROUP OF COMPANIES. Please provide helpful information about:
+            - Appointment scheduling
+            - Office locations and room numbers
+            - Company services
+            - Directions within the building
+            - Contact information
+            
+            User's name is ${this.userName}. User's question: ${userMessage}`;
+            
+            const aiResponse = await fetchGroqResponse(this.API_CONFIG.openai_key, contextMessage);
+            
+            // Use text-to-speech with receptionist voice (no text display)
+            await this.speakResponse(aiResponse);
+        
+            // Remove the loading animation after we receive the response
+            document.getElementById('input-container').classList.remove('loading');
+        
+            document.getElementById('user-input-field').value = '';
+          } catch (error) {
+            console.error('Talk Error:', error);
+            alert(`Error: ${error.message}`);
+        
+            // Remove the loading animation in case of an error
+            document.getElementById('input-container').classList.remove('loading');
+          }
+        }
+
+        // Clean response text by removing markdown and special characters
+        cleanResponseText(text) {
+          // Remove markdown characters
+          return text
+            .replace(/\*\*/g, '')  // Remove bold markers
+            .replace(/__/g, '')    // Remove underline markers
+            .replace(/\*/g, '')    // Remove italic markers
+            .replace(/_/g, '')     // Remove italic markers
+            .replace(/#/g, '')     // Remove header markers
+            .replace(/`/g, '')     // Remove code markers
+            .replace(/\[.*?\]\(.*?\)/g, '') // Remove links
+            .replace(/\n/g, ' ')   // Replace newlines with spaces
+            .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+            .trim();               // Trim whitespace
+        }
+
+        async speakResponse(text) {
+          try {
+            // Clean the response text
+            const cleanText = this.cleanResponseText(text);
+            
+            // Use Web Speech API for text-to-speech
+            if ('speechSynthesis' in window) {
+              return new Promise((resolve, reject) => {
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                
+                // Try to find a female voice
+                const voices = speechSynthesis.getVoices();
+                const femaleVoices = voices.filter(voice => 
+                  voice.name.includes('Female') || 
+                  voice.name.includes('Woman') || 
+                  voice.name.includes('Girl') ||
+                  voice.name.includes('Victoria') ||
+                  voice.name.includes('Samantha') ||
+                  voice.name.includes('Karen') ||
+                  voice.name.includes('Moira') ||
+                  voice.name.includes('Tessa') ||
+                  voice.name.includes('Yuna') ||
+                  voice.name.includes('Microsoft Zira') ||
+                  voice.name.includes('Google UK English Female')
+                );
+                
+                // Use a female voice if available, otherwise use default
+                if (femaleVoices.length > 0) {
+                  utterance.voice = femaleVoices[0];
+                }
+                
+                // Receptionist settings
+                utterance.rate = this.API_CONFIG.voice_settings?.rate || 1.3;
+                utterance.pitch = this.API_CONFIG.voice_settings?.pitch || 1.2;
+                utterance.volume = 1.0;
+                
+                // Create speech events for lip-sync
+                this.createSpeechEvents(cleanText);
+                
+                // Show visual feedback with realistic lip-sync
+                this.showAvatarSpeaking(true);
+                
+                // When speech ends, show idle state
+                utterance.onend = () => {
+                  this.showAvatarSpeaking(false);
+                  resolve();
+                };
+                
+                utterance.onerror = (event) => {
+                  this.showAvatarSpeaking(false);
+                  reject(event);
+                };
+                
+                // Play the speech
+                speechSynthesis.speak(utterance);
+              });
+            } else {
+              // Fallback: show text only
+              this.showAvatarSpeaking(true);
+              // Simulate speaking duration based on text length
+              const duration = Math.min(cleanText.length * 50, this.talkVideoDuration * 1000); // Cap at video duration
+              clearTimeout(this.speechTimeout);
+              this.speechTimeout = setTimeout(() => {
+                this.showAvatarSpeaking(false);
+              }, duration);
+            }
+          } catch (error) {
+            console.error('Speech Error:', error);
+            this.showAvatarSpeaking(false);
+          }
+        }
+
+        // Create speech events based on text for lip-sync
+        createSpeechEvents(text) {
+          // Simple approach: create events based on word count and punctuation
+          this.speechEvents = [];
+          const words = text.split(/\s+/);
+          const punctuation = text.match(/[.!?;,]/g) || [];
+          
+          // Create events for each word and punctuation
+          let time = 0;
+          for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            const hasPunctuation = /[.!?;,]/.test(word);
+            
+            // Determine event type based on word characteristics
+            let eventType = "consonant";
+            if (word.length <= 3) {
+              eventType = "short_a";
+            } else if (word.length >= 8) {
+              eventType = "long_a";
+            } else if (hasPunctuation) {
+              eventType = "pause";
+            }
+            
+            this.speechEvents.push({
+              type: eventType,
+              word: word,
+              time: time
+            });
+            
+            // Increment time (roughly based on word length and speech rate)
+            time += (word.length * 0.1) + 0.2;
+          }
+          
+          this.currentSpeechEventIndex = 0;
+        }
+
+        // Play appropriate segment based on speech event
+        playAppropriateSegment(event) {
+          // Find a segment that matches the event type
+          const matchingSegments = this.talkSegments.filter(segment => segment.type === event.type);
+          
+          if (matchingSegments.length > 0) {
+            // Select a random matching segment
+            const randomIndex = Math.floor(Math.random() * matchingSegments.length);
+            this.currentSegment = matchingSegments[randomIndex];
+          } else {
+            // Fallback to random segment
+            this.playRandomTalkSegment();
+            return;
+          }
+          
+          // Set the video to start at the segment's start time
+          this.talkVideo.currentTime = this.currentSegment.start;
+          
+          // Play the video
+          this.talkVideo.play().catch(e => console.log("Video play error:", e));
+        }
+
+        // Play a random talk segment for variety
+        playRandomTalkSegment() {
+          if (this.talkSegments.length === 0) return;
+          
+          // Select a random segment
+          const randomIndex = Math.floor(Math.random() * this.talkSegments.length);
+          this.currentSegment = this.talkSegments[randomIndex];
+          
+          // Set the video to start at the segment's start time
+          this.talkVideo.currentTime = this.currentSegment.start;
+          
+          // Play the video
+          this.talkVideo.play().catch(e => console.log("Video play error:", e));
+        }
+
+        showAvatarSpeaking(isSpeaking) {
+          this.isSpeaking = isSpeaking;
+          
+          if (isSpeaking) {
+            // Show talking animation with realistic segments
+            this.idleVideo.style.display = 'none';
+            this.talkVideo.style.display = 'block';
+            
+            // Reset speech event index
+            this.currentSpeechEventIndex = 0;
+            
+            // If we have speech events, start with the first one
+            if (this.speechEvents.length > 0) {
+              this.playAppropriateSegment(this.speechEvents[0]);
+            } else {
+              // Otherwise, start with a random segment
+              this.playRandomTalkSegment();
+            }
+          } else {
+            // Return to idle state
+            this.talkVideo.style.display = 'none';
+            this.idleVideo.style.display = 'block';
+            this.idleVideo.play().catch(e => console.log("Video play error:", e));
+            
+            // Clear current segment
+            this.currentSegment = null;
+            this.speechEvents = [];
+            this.currentSpeechEventIndex = 0;
+          }
+        }
+
+        showError(message) {
+          alert(message);
+          console.error(message);
+        }
+      }
+
+      // Initialize when the page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        new ReceptionistAgent();
+      });
+    </script>
+  </body>
+</html>
