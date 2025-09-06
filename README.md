@@ -86,35 +86,10 @@ This application can be deployed to Vercel with the following steps:
 1. Push your code to a GitHub repository (make sure not to include `api.json` with real API keys)
 2. Sign up for a free account at [Vercel](https://vercel.com/)
 3. Create a new project and import your GitHub repository
-4. Vercel will automatically detect the configuration and deploy your application
-5. Add your Groq API key as an environment variable in your Vercel project settings:
-   - Go to your project settings in Vercel
-   - Navigate to the "Environment Variables" section
-   - Add a new variable with the name `GROQ_API_KEY` and your API key as the value
-6. Update your `api.json` file to use the environment variable:
-   ```json
-   {
-       "openai_key": "${GROQ_API_KEY}",
-       "model": "openai/gpt-oss-20b",
-       "voice_settings": {
-           "pitch": 1.2,
-           "rate": 1.3,
-           "voice_type": "female"
-       },
-       "company_context": {
-           "name": "AL RAWABI GROUP OF COMPANIES",
-           "role": "Receptionist",
-           "services": [
-               "Appointment scheduling",
-               "Office location guidance",
-               "Room number information",
-               "Company service explanations",
-               "Building directions",
-               "Contact information"
-           ]
-       }
-   }
-   ```
+4. In your Vercel project settings, add an environment variable:
+   - Name: `GROQ_API_KEY`
+   - Value: Your actual Groq API key
+5. Vercel will automatically detect the configuration and deploy your application
 
 ## How It Works
 
@@ -139,10 +114,10 @@ This application can be deployed to Vercel with the following steps:
 
 - `index.html` - Main HTML interface (fully local implementation)
 - `app.js` - Express server to serve the files locally
-- `api/server.js` - Express server for Vercel deployment
+- `api/groq.js` - Vercel serverless function for Groq API requests
 - `api.json` - Configuration file for API keys and voice settings (not in repo for security)
 - `api.json.template` - Template for API configuration
-- `openai.js` - Groq API integration with company context
+- `openai.js` - Groq API integration with company context (used for local development)
 - `test-local.js` - Test script for local setup
 - `oracle_Idle.mp4` - 10-second idle animation video
 - `talk.mp4` - 19-second talking animation video
@@ -205,6 +180,11 @@ To use different videos:
 - Make sure your Groq API key is valid
 - Check that the key starts with "gsk_"
 - Verify you have internet connectivity
+
+### Vercel Deployment Issues
+- Make sure you've added the `GROQ_API_KEY` environment variable in your Vercel project settings
+- Check that your GitHub repository doesn't contain the actual `api.json` file with real API keys
+- Redeploy your application after making changes to environment variables
 
 ## Resources
 

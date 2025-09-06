@@ -1,394 +1,4 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>AL RAWABI GROUP OF COMPANIES Receptionist</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
 
-      body {
-        background-color: #233030; /* Changed to #233030 */
-        color: #FFD700; /* Golden color */
-        font-family: 'Arial', sans-serif;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        height: 100vh;
-        width: 100vw;
-      }
-
-      #video-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1;
-      }
-
-      #idle-video,
-      #talk-video {
-        width: auto; /* Fit height, not width */
-        height: 100%;
-        object-fit: contain; /* Contain to show full video */
-      }
-
-      #talk-video {
-        display: none;
-      }
-
-      #input-container {
-        position: fixed;
-        bottom: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80%;
-        max-width: 500px;
-        z-index: 10;
-        display: none;
-      }
-
-      #user-input-field {
-        width: 100%;
-        padding: 15px 60px 15px 60px; /* Added space for microphone button */
-        border-radius: 30px;
-        border: 2px solid #FFD700; /* Golden color */
-        background: rgba(0, 0, 0, 0.7);
-        color: #FFD700; /* Golden color */
-        font-size: 18px;
-        outline: none;
-        text-align: center;
-      }
-
-      #enter-button {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: #FFD700; /* Golden color */
-        border: none;
-        color: #000;
-        cursor: pointer;
-        font-size: 20px;
-        padding: 8px 15px;
-        border-radius: 50%;
-        font-weight: bold;
-        transition: all 0.2s ease;
-      }
-
-      #enter-button:hover {
-        background: #FFEC8B; /* Light golden color */
-        transform: translateY(-50%) scale(1.1);
-      }
-
-      #fullscreen-indicator {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: rgba(0, 0, 0, 0.7);
-        color: #FFD700; /* Golden color */
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 14px;
-        z-index: 100;
-        display: none;
-      }
-
-      .hidden {
-        display: none !important;
-      }
-
-      .visible {
-        display: block !important;
-      }
-
-      /* Fullscreen styles */
-      :-webkit-full-screen {
-        width: 100% !important;
-        height: 100% !important;
-      }
-
-      :-moz-full-screen {
-        width: 100% !important;
-        height: 100% !important;
-      }
-
-      :-ms-fullscreen {
-        width: 100% !important;
-        height: 100% !important;
-      }
-
-      :full-screen {
-        width: 100% !important;
-        height: 100% !important;
-      }
-
-      /* Loading animation */
-      #input-container.loading::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        right: 60px;
-        transform: translateY(-50%);
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(0, 0, 0, 0.1);
-        border-top: 3px solid #FFD700; /* Golden color */
-        border-radius: 50%;
-        animation: spinner-border 0.75s linear infinite;
-      }
-
-      @keyframes spinner-border {
-        100% {
-          transform: translateY(-50%) rotate(360deg);
-        }
-      }
-
-      /* Initial name input */
-      #name-input-container {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 80%;
-        max-width: 500px;
-        z-index: 20;
-        text-align: center;
-      }
-
-      #name-input-field {
-        width: 100%;
-        padding: 15px;
-        border-radius: 30px;
-        border: 2px solid #FFD700; /* Golden color */
-        background: rgba(0, 0, 0, 0.7);
-        color: #FFD700; /* Golden color */
-        font-size: 18px;
-        outline: none;
-        text-align: center;
-        margin-bottom: 20px;
-      }
-
-      #name-enter-button {
-        background: #FFD700; /* Golden color */
-        border: none;
-        color: #000;
-        cursor: pointer;
-        font-size: 18px;
-        padding: 12px 30px;
-        border-radius: 30px;
-        font-weight: bold;
-        transition: all 0.2s ease;
-      }
-
-      #name-enter-button:hover {
-        background: #FFEC8B; /* Light golden color */
-        transform: scale(1.05);
-      }
-
-      #company-name {
-        position: fixed;
-        bottom: 20px;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        font-size: 16px;
-        color: #FFD700; /* Golden color */
-        z-index: 10;
-      }
-
-      /* Microphone button for speech-to-text */
-      #microphone-button {
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: #FFD700; /* Golden color */
-        border: none;
-        color: #000;
-        cursor: pointer;
-        font-size: 20px;
-        padding: 8px 15px;
-        border-radius: 50%;
-        font-weight: bold;
-        transition: all 0.2s ease;
-      }
-
-      #microphone-button:hover {
-        background: #FFEC8B; /* Light golden color */
-        transform: translateY(-50%) scale(1.1);
-      }
-
-      #microphone-button.listening {
-        animation: pulse 1s infinite;
-      }
-
-      @keyframes pulse {
-        0% { transform: translateY(-50%) scale(1); }
-        50% { transform: translateY(-50%) scale(1.1); }
-        100% { transform: translateY(-50%) scale(1); }
-      }
-
-      /* Speech recognition status */
-      #speech-status {
-        position: fixed;
-        top: 120px;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        font-size: 16px;
-        color: #FFD700; /* Golden color */
-        z-index: 10;
-        padding: 0 20px;
-        display: none;
-      }
-
-      /* Popup styles */
-      .popup {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        z-index: 100;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .popup-content {
-        background-color: #000;
-        padding: 30px;
-        border-radius: 10px;
-        border: 2px solid #FFD700;
-        text-align: center;
-        max-width: 400px;
-        width: 80%;
-      }
-
-      .popup-content h3 {
-        color: #FFD700;
-        margin-bottom: 20px;
-      }
-
-      .popup-content p {
-        color: #FFD700;
-        margin-bottom: 20px;
-      }
-
-      .popup-content button {
-        background: #FFD700;
-        border: none;
-        color: #000;
-        cursor: pointer;
-        font-size: 16px;
-        padding: 10px 20px;
-        border-radius: 30px;
-        font-weight: bold;
-        margin: 5px;
-        transition: all 0.2s ease;
-        width: 100%;
-        margin-bottom: 10px;
-      }
-
-      .popup-content button:hover {
-        background: #FFEC8B;
-        transform: scale(1.05);
-      }
-
-      /* Camera container for face detection */
-      #camera-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 2;
-        display: none;
-      }
-
-      #camera-video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      #face-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-      }
-
-      #face-rectangle {
-        position: absolute;
-        border: 2px solid #FFD700;
-        display: none;
-      }
-
-      #face-prompt {
-        position: absolute;
-        top: 20px;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        color: #FFD700;
-        font-size: 18px;
-        font-weight: bold;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 10px;
-        display: none;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div id="video-container">
-      <video id="idle-video" src="./oracle_Idle.mp4" autoplay muted loop playsinline></video>
-      <video id="talk-video" src="./talk.mp4" autoplay muted playsinline></video>
-    </div>
-
-    <!-- Camera container for face detection (hidden from view) -->
-    <div id="camera-container" style="display: none;">
-      <video id="camera-video" autoplay playsinline style="display: none;"></video>
-      <div id="face-overlay" style="display: none;">
-        <div id="face-rectangle"></div>
-        <div id="face-prompt">Hey, do you want an appointment? Someone please enter or speak your name.</div>
-      </div>
-    </div>
-
-    <div id="speech-status">Listening...</div>
-
-    <div id="name-input-container">
-      <input type="text" id="name-input-field" placeholder="Enter your name">
-      <button id="name-enter-button">Enter</button>
-    </div>
-
-    <div id="input-container">
-      <button id="microphone-button">Mic</button>
-      <input type="text" id="user-input-field" placeholder="How can I help you today?">
-      <button id="enter-button">Enter</button>
-    </div>
-
-    <!-- Exit chat button (hidden by default) -->
-    <div id="exit-container" style="position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 500px; z-index: 10; display: none; text-align: center;">
-      <button id="exit-button" style="background: #FFD700; border: none; color: #000; cursor: pointer; font-size: 18px; padding: 12px 30px; border-radius: 30px; font-weight: bold; transition: all 0.2s ease;">Exit Chat</button>
-    </div>
-
-    <div id="company-name">AL RAWABI GROUP OF COMPANIES</div>
-    <div id="fullscreen-indicator">Press ESC to exit fullscreen</div>
-
-    <script type="module">
       // Fully local implementation for AL RAWABI GROUP OF COMPANIES Receptionist
       class ReceptionistAgent {
         constructor() {
@@ -643,39 +253,6 @@
           }
         }
 
-        // Handle appointment-related queries with AI guidance
-        async handleAppointmentQuery(message) {
-          // Provide context-aware guidance
-          let guidanceMessage = '';
-          const lowerMessage = message.toLowerCase();
-          
-          if (lowerMessage.includes('how') || lowerMessage.includes('help')) {
-            guidanceMessage = 'I can help you schedule meetings, book appointments, or arrange casual visits with our departments. Simply tell me what you need, and I will guide you through the process.';
-          } else if (lowerMessage.includes('department')) {
-            guidanceMessage = 'We have several departments available for appointments: General, HR, Accounts, Purchase, Marketing, and IT. Which department would you like to schedule with?';
-          } else if (lowerMessage.includes('time') || lowerMessage.includes('when')) {
-            guidanceMessage = 'Our business hours are from 9 AM to 5 PM, Monday through Friday. Appointments can be scheduled during these hours. Would you like to proceed with scheduling?';
-          } else {
-            guidanceMessage = 'I understand you are interested in scheduling an appointment. I can help you with that. Would you like to schedule a meeting, book an appointment, or arrange a casual visit?';
-          }
-          
-          await this.speakResponse(guidanceMessage);
-          
-          // After providing guidance, automatically suggest appointment options
-          setTimeout(() => {
-            this.automaticallySuggestAppointmentOptions();
-          }, 1000);
-        }
-
-        // Automatically suggest appointment options without requiring button clicks
-        async automaticallySuggestAppointmentOptions() {
-          // Speak guidance for appointment types
-          await this.speakResponse("Please choose from the following options: 1. Schedule a Meeting, 2. Book an Appointment, 3. Casual Visit. You can say the number or name of your choice.");
-          
-          // Set flag to indicate we're waiting for voice selection
-          this.showingAppointmentOptions = true;
-        }
-
         // Handle voice commands for appointment system
         async handleVoiceCommand(transcript) {
           const lowerTranscript = transcript.toLowerCase().trim();
@@ -692,6 +269,7 @@
               this.selectAppointmentOption('Casual Visit');
               return;
             } else if (lowerTranscript.includes('cancel') || lowerTranscript.includes('back')) {
+              this.closePopup('appointment-popup');
               this.showingAppointmentOptions = false;
               this.speakResponse("Appointment scheduling cancelled. How else can I help you?");
               return;
@@ -723,6 +301,7 @@
               this.selectDepartmentOption('IT');
               return;
             } else if (lowerTranscript.includes('cancel') || lowerTranscript.includes('back')) {
+              this.closePopup('department-popup');
               this.showingDepartmentOptions = false;
               this.speakResponse("Department selection cancelled. How else can I help you?");
               return;
@@ -801,32 +380,18 @@
         // Select appointment option by voice
         selectAppointmentOption(option) {
           this.showingAppointmentOptions = false;
-          this.currentAppointmentType = option;
+          this.showDepartmentSelection(option);
+          this.showingDepartmentOptions = true;
           
-          // Automatically proceed to department selection
-          setTimeout(() => {
-            this.automaticallySuggestDepartmentOptions();
-          }, 500);
+          // Speak guidance for department selection
+          this.speakResponse("Please choose a department: 1. General, 2. HR, 3. Accounts, 4. Purchase, 5. Marketing, 6. IT. Please say the number or name of your choice.");
         }
 
         // Select department option by voice
         selectDepartmentOption(department) {
           this.showingDepartmentOptions = false;
           this.currentDepartment = department;
-          
-          // Automatically complete the appointment
-          setTimeout(() => {
-            this.completeAppointment();
-          }, 500);
-        }
-
-        // Automatically suggest department options without requiring button clicks
-        async automaticallySuggestDepartmentOptions() {
-          // Speak guidance for department selection
-          await this.speakResponse("Please choose a department: 1. General, 2. HR, 3. Accounts, 4. Purchase, 5. Marketing, 6. IT. You can say the number or name of your choice.");
-          
-          // Set flag to indicate we're waiting for voice selection
-          this.showingDepartmentOptions = true;
+          this.completeAppointment();
         }
 
         // Handle appointment scheduling with voice guidance
@@ -920,6 +485,24 @@
           });
         }
 
+        // Complete the appointment process
+        async completeAppointment() {
+          // Close department popup
+          this.closePopup('department-popup');
+          
+          // Generate appointment token
+          const appointmentToken = this.generateAppointmentToken();
+          
+          // Show appointment confirmation
+          const confirmationMessage = `Your ${this.currentAppointmentType} with the ${this.currentDepartment} department has been scheduled. Your appointment token is ${appointmentToken}. Please wait to be called. Is there anything else I can help you with?`;
+          await this.speakResponse(confirmationMessage);
+          
+          // Show exit button after completion
+          setTimeout(() => {
+            this.exitContainer.style.display = 'block';
+          }, 2000);
+        }
+
         // Generate a random appointment token
         generateAppointmentToken() {
           const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -930,197 +513,36 @@
           return token;
         }
 
-        // Send appointment email
-        async sendAppointmentEmail(appointmentType, department, userName, appointmentToken) {
-          try {
-            // For now, we'll simulate email sending
-            // In a real implementation, this would connect to an email service
-            console.log(`Sending email for ${appointmentType} with ${department} department`);
-            console.log(`User: ${userName}, Token: ${appointmentToken}`);
-            
-            // Simulate API call to send email
-            // This would be replaced with actual email sending code
-            const emailData = {
-              to: department === 'HR' ? 'hr@minhaj.pro' : 'minhajt.uae@gmail.com',
-              from: 'hey@minhaj.pro',
-              subject: `New ${appointmentType} Scheduled - Token: ${appointmentToken}`,
-              body: `
-Dear ${department} Team,
-
-A new ${appointmentType} has been scheduled with the following details:
-
-User Name: ${userName}
-Appointment Type: ${appointmentType}
-Department: ${department}
-Token: ${appointmentToken}
-Date: ${new Date().toLocaleDateString()}
-Time: ${new Date().toLocaleTimeString()}
-
-Please be prepared to assist the visitor when they arrive.
-
-Best regards,
-AL RAWABI GROUP OF COMPANIES Receptionist
-              `.trim()
-            };
-            
-            // In a real implementation, you would send this data to a server endpoint
-            // that handles the actual email sending using the provided SMTP settings
-            console.log('Email data prepared:', emailData);
-            
-            // Simulate successful email sending
-            return { success: true, message: 'Email sent successfully' };
-          } catch (error) {
-            console.error('Error sending appointment email:', error);
-            return { success: false, message: 'Failed to send email' };
-          }
-        }
-
-        // Complete the appointment process
-        async completeAppointment() {
-          // Close department popup
-          this.closePopup('department-popup');
-          
-          // Generate appointment token
-          const appointmentToken = this.generateAppointmentToken();
-          
-          // Send appointment email
-          const emailResult = await this.sendAppointmentEmail(
-            this.currentAppointmentType, 
-            this.currentDepartment, 
-            this.userName, 
-            appointmentToken
-          );
-          
-          // Show appointment confirmation
-          let confirmationMessage = `Your ${this.currentAppointmentType} with the ${this.currentDepartment} department has been scheduled. Your appointment token is ${appointmentToken}.`;
-          
-          if (emailResult.success) {
-            confirmationMessage += ' A confirmation email has been sent. Please wait to be called. Is there anything else I can help you with?';
-          } else {
-            confirmationMessage += ' Please wait to be called. Is there anything else I can help you with?';
-          }
-          
-          await this.speakResponse(confirmationMessage);
-          
-          // Print appointment ticket
-          this.printAppointmentTicket(
-            this.currentAppointmentType, 
-            this.currentDepartment, 
-            this.userName, 
-            appointmentToken
-          );
-          
-          // Show exit button after completion
-          setTimeout(() => {
-            this.exitContainer.style.display = 'block';
-          }, 2000);
-        }
-
-        // Print appointment ticket
-        printAppointmentTicket(appointmentType, department, userName, appointmentToken) {
-          try {
-            const printWindow = window.open('', '_blank');
-            const printContent = `
-              <!DOCTYPE html>
-              <html>
-                <head>
-                  <title>Appointment Ticket</title>
-                  <style>
-                    body {
-                      font-family: Arial, sans-serif;
-                      max-width: 400px;
-                      margin: 20px auto;
-                      padding: 20px;
-                      border: 2px solid #FFD700;
-                      background-color: #233030;
-                      color: #FFD700;
-                    }
-                    .header {
-                      text-align: center;
-                      margin-bottom: 20px;
-                    }
-                    .ticket-info {
-                      margin: 15px 0;
-                    }
-                    .label {
-                      font-weight: bold;
-                    }
-                    .token {
-                      font-size: 24px;
-                      text-align: center;
-                      margin: 20px 0;
-                      padding: 10px;
-                      border: 2px dashed #FFD700;
-                    }
-                    .footer {
-                      text-align: center;
-                      margin-top: 30px;
-                      font-size: 12px;
-                    }
-                  </style>
-                </head>
-                <body>
-                  <div class="header">
-                    <h2>AL RAWABI GROUP OF COMPANIES</h2>
-                    <h3>Appointment Ticket</h3>
-                  </div>
-                  
-                  <div class="ticket-info">
-                    <div class="label">Name:</div>
-                    <div>${userName}</div>
-                  </div>
-                  
-                  <div class="ticket-info">
-                    <div class="label">Appointment Type:</div>
-                    <div>${appointmentType}</div>
-                  </div>
-                  
-                  <div class="ticket-info">
-                    <div class="label">Department:</div>
-                    <div>${department}</div>
-                  </div>
-                  
-                  <div class="ticket-info">
-                    <div class="label">Date:</div>
-                    <div>${new Date().toLocaleDateString()}</div>
-                  </div>
-                  
-                  <div class="ticket-info">
-                    <div class="label">Time:</div>
-                    <div>${new Date().toLocaleTimeString()}</div>
-                  </div>
-                  
-                  <div class="token">
-                    Token: ${appointmentToken}
-                  </div>
-                  
-                  <div class="footer">
-                    Please keep this ticket for reference.<br>
-                    You will be called when it's your turn.
-                  </div>
-                </body>
-              </html>
-            `;
-            
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            
-            // Print after a short delay to ensure content is loaded
-            setTimeout(() => {
-              printWindow.focus();
-              printWindow.print();
-              // Don't close automatically to allow user to review
-            }, 500);
-          } catch (error) {
-            console.error('Error printing appointment ticket:', error);
-          }
-        }
-
         // Close popup by ID
         closePopup(popupId) {
           const popup = document.getElementById(popupId);
           if (popup) {
             popup.remove();
+          }
+        }
+
+        async init() {
+          try {
+            this.setupEventListeners();
+
+            // Set up video event listeners
+            this.setupVideoListeners();
+
+            // Set up fullscreen event listeners
+            this.setupFullscreenListeners();
+
+            // Initialize talk segments for realistic lip-sync
+            this.initializeTalkSegments();
+
+            // Initialize speech recognition
+            this.initSpeechRecognition();
+
+            // Start eye detection (camera always on)
+            this.startFaceDetection();
+
+            console.log('Receptionist Agent initialized successfully');
+          } catch (error) {
+            this.showError(`Initialization failed: ${error.message}`);
           }
         }
 
@@ -1876,6 +1298,4 @@ AL RAWABI GROUP OF COMPANIES Receptionist
       document.addEventListener('DOMContentLoaded', () => {
         new ReceptionistAgent();
       });
-    </script>
-  </body>
-</html>
+    

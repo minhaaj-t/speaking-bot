@@ -6,17 +6,12 @@ async function testReceptionistSetup() {
     try {
         console.log('🧪 Testing AL RAWABI GROUP OF COMPANIES Receptionist Setup...\n');
         
-        // Check if Groq API key exists
+        // Check if Google Gemini API key exists
         if (!config.openai_key) {
-            throw new Error('Missing Groq API key in api.json');
+            throw new Error('Missing Google Gemini API key in api.json');
         }
 
-        // Check if the key has the right format
-        if (!config.openai_key.startsWith('gsk_')) {
-            console.warn('⚠ Warning: Groq API key should start with "gsk_"');
-        }
-
-        console.log('✅ Groq API key found in api.json');
+        console.log('✅ Google Gemini API key found in api.json');
         console.log('✅ Configuration file is valid');
 
         // Check company context
@@ -27,12 +22,12 @@ async function testReceptionistSetup() {
             console.log(`✅ Services: ${config.company_context.services.length} services configured`);
         }
 
-        // Test Groq API
-        console.log('\n📡 Testing Groq API connection...');
+        // Test Google Gemini API
+        console.log('\n📡 Testing Google Gemini API connection...');
         const { fetchGroqResponse } = await import('./openai.js');
         
         const testResponse = await fetchGroqResponse(config.openai_key, "As a receptionist for AL RAWABI GROUP OF COMPANIES, briefly introduce yourself.");
-        console.log('✅ Groq API is working correctly');
+        console.log('✅ Google Gemini API is working correctly');
         console.log('💬 Test response:', testResponse);
 
         // Check if required files exist

@@ -2,13 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/groq.js",
+      "src": "app.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    { "handle": "filesystem" },
-    { "src": "/api/groq", "dest": "/api/groq.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/(.*)",
+      "dest": "app.js"
+    }
   ]
 }
